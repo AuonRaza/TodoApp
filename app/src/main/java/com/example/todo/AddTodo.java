@@ -100,6 +100,7 @@ public class AddTodo extends AppCompatActivity {
                     currentTime); //time
             TodoDatabase db = new TodoDatabase(this);
             db.addTodo(todo);
+            db.close();
             Toast.makeText(this, "Save btn clicked", Toast.LENGTH_SHORT).show();
             goToMain();
         }

@@ -49,17 +49,48 @@ public class TodoDatabase extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public int getLastID(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT MAX("+KEY_ID+") "+"FROM "+DATABASE_TABLE;
+        Cursor max = db.rawQuery(query,null);
+        return Integer.valueOf(max.getString(0));
+    }
+
+    public boolean ifExist(long id){
+        //SELECT * FROM TABLE WHERE ID = id
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM "+DATABASE_TABLE+" WHERE ID="+id;
+        Cursor isEmpty = db.rawQuery(query,null);
+        if (isEmpty == null)
+            return false;
+        else
+            return true;
+
+    }
+
+
+
     public long addTodo(Todo todo){
+        long ifID = todo.getId();
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues c = new ContentValues();
-        c.put(KEY_TITLE,todo.getTitle());
-        c.put(KEY_TODO ,todo.getContent());
-        c.put(KEY_DATE,todo.getDate());
-        c.put(KEY_TIME,todo.getTime());
-
-        long ID =  db.insert(DATABASE_TABLE,null,c);
-        Log.d("Inserted","ID --> "+ID);
-        return ID;
+        c.put(KEY_TITLE, todo.getTitle());
+        c.put(KEY_TODO, todo.getContent());
+        c.put(KEY_DATE, todo.getDate());
+        c.put(KEY_TIME, todo.getTime());
+        if (ifID==0L) {
+            long ID = db.insert(DATABASE_TABLE, null, c);
+            Log.d("Inserted", "from user; ID --> " + ID);
+            return ID;
+        }else{
+            if (ifExist(ifID)){
+                deleteTodo(ifID);
+            }
+                c.put(KEY_ID,ifID);
+                db.insert(DATABASE_TABLE,null,c);
+                Log.d("Inserted", "from PubApi; ID --> " + ifID);
+                return ifID;
+        }
     }
 
     public Todo getTodo(long id){
@@ -115,6 +146,6 @@ public class TodoDatabase extends SQLiteOpenHelper {
     void deleteTodo(long id){
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(DATABASE_TABLE,KEY_ID+"=?",new String[]{String.valueOf(id)});
-        db.close();
+//        db.close();
     }
 }
