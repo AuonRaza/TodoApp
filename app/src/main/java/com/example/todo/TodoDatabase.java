@@ -49,10 +49,12 @@ public class TodoDatabase extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public int getLastID(){
+    //This function will be used to get count of the ids, that exists just above the id passed.
+    public int getLastID(int id){
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT MAX("+KEY_ID+") "+"FROM "+DATABASE_TABLE;
+        String query = "SELECT COUNT(*) "+"FROM "+DATABASE_TABLE+" WHERE ID < "+id;
         Cursor max = db.rawQuery(query,null);
+        max.moveToFirst();
         return Integer.valueOf(max.getString(0));
     }
 

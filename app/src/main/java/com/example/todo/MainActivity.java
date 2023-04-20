@@ -1,11 +1,13 @@
  package com.example.todo;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,7 +37,7 @@ import java.util.List;
     Button getJson;
 
     //API endpoint
-    String myUrl = "https://www.jsonkeeper.com/b/UOYR";
+    String myUrl = "https://jsonkeeper.com/b/C73E";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +86,11 @@ import java.util.List;
                 }
                 TodoDatabase db = new TodoDatabase(MainActivity.this);
                 db.addTodo(todo);
+
+                int rvPos = db.getLastID(Integer.parseInt(String.valueOf(todo.getId())));
+                boolean exists = db.ifExist(todo.getId());
+                insertApiDataToRv(todo,rvPos,exists);
+
             }
         }, new Response.ErrorListener() {
             @Override
@@ -95,6 +102,18 @@ import java.util.List;
         requestQueue.add(jsonObjectRequest);
     }
 
+    private void insertApiDataToRv(Todo todo,int rvPos,boolean exists){
+        int insertIndex = rvPos;
+
+        if (exists) {
+            todos.remove(insertIndex); //deleting any old todo at the same position.
+            adapter.notifyItemRemoved(insertIndex);
+        }
+
+        todos.add(insertIndex,todo);
+        adapter.notifyItemInserted(insertIndex);
+    }
+
      @Override
      public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -104,7 +123,20 @@ import java.util.List;
 
      @Override
      public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId()==R.id.add){
+//         AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this)
+//                 .setTitle("Add Todo")
+//                 .setMessage("Select the type of todo you want to add.")
+//                 .setCancelable(false)
+//                 .create();
+//         //setting simple todo button
+//         alertDialog.setButton("SIMPLE",new DialogInterface.OnClickListener(){
+//             @Override
+//             public void onClick(DialogInterface dialog, int which) {
+//                 Intent i = new Intent(this,AddTodo.class);
+//                 startActivity(i);
+//             }
+//         } );
+         if (item.getItemId()==R.id.add){
             Toast.makeText(this, "Add Button is Clicked", Toast.LENGTH_SHORT).show();
             Intent i = new Intent(this,AddTodo.class);
             startActivity(i);
